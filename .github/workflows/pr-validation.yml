@@ -1,0 +1,24 @@
+name: PR Validation
+on:
+  pull_request:
+    branches: [ develop ]
+
+jobs:
+  run_lint:
+    name: make sure your PR is clean and build-able
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout to the branch
+        uses: actions/checkout@v2
+
+      - name: setup node
+        uses: actions/setup-node@v2
+
+      - name: installing depedencies
+        run: npm install --legacy-peer-deps
+
+      - name: running test
+        run: npm run test
+
+      - name: building
+        run: npm run build --if-present

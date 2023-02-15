@@ -1,19 +1,22 @@
-# Name of the workflow
-name: Release
-
-# Run on every commit tag which begins with "v" (e.g., "v0.1.4")
+name: Node.js CI
 on:
   push:
-    tags:
-      - "v*"
-
-# Automatically create a GitHub Release, with release details specified (the relevant commits)
+    branches: [ develop ]
+env:
+  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 jobs:
-  release:
-    name: "Release"
-    runs-on: "ubuntu-latest"
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [16.x, 18.x]
     steps:
-      - uses: "marvinpinto/action-automatic-releases@latest"
-        with:
-          repo_token: "${{ secrets.GITHUB_TOKEN }}"
-          prerelease: false
+    - uses: actions/checkout@v3
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v3
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+    - run: npm ci
+    - run: npm run build --if-present
+    - run: npx semantic-release
